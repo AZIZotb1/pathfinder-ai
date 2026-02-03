@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+.venv/
+env/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Build artifacts
+dist/
+build/
+out/
+frontend/build/
+
+# Environment variables and secrets
+.env
+*.pem
+*.key
+
+# Logs and temporary files
+*.log
+*.sqlite
+temp/
+tmp/
+.cache/
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
