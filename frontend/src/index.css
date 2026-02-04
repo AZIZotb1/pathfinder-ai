@@ -4,5 +4,23 @@
 
 body {
   margin: 0;
-  background-color: #111827; /* Matches gray-900 */
+  background-color: #0B0C15; /* brand-dark */
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0B0C15;
+}
+::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #4B5563;
 }
