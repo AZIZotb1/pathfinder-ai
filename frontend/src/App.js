@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import Roadmap from './components/Roadmap';
+import SavedRoadmaps from './components/SavedRoadmaps';
 import InteractiveBackground from './components/InteractiveBackground';
-// Added 'Compass' to the imports for the logo
-import { Sparkles, Map, ArrowRight, Loader2, AlertCircle, Compass } from 'lucide-react';
+import RoadmapStorage from './utils/RoadmapStorage';
+import { Sparkles, Map, ArrowRight, Loader2, AlertCircle, Compass, BookMarked, Save } from 'lucide-react';
 
 function App() {
   const [goal, setGoal] = useState('');
@@ -10,6 +11,9 @@ function App() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showLibrary, setShowLibrary] = useState(false);
+  const [savedCount, setSavedCount] = useState(RoadmapStorage.getCount());
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   const handleGenerate = async () => {
     if (!goal) return;
@@ -38,6 +42,29 @@ function App() {
     }
   };
 
+  const handleSaveRoadmap = () => {
+    if (!data || !goal) return;
+
+    const saved = RoadmapStorage.saveRoadmap(goal, level, data);
+    if (saved) {
+      setSavedCount(RoadmapStorage.getCount());
+      setShowSaveSuccess(true);
+      setTimeout(() => setShowSaveSuccess(false), 3000);
+    }
+  };
+
+  const handleLoadRoadmap = (roadmap) => {
+    setGoal(roadmap.goal);
+    setLevel(roadmap.level);
+    setData(roadmap.steps);
+    setError('');
+  };
+
+  const handleOpenLibrary = () => {
+    setSavedCount(RoadmapStorage.getCount()); // Refresh count
+    setShowLibrary(true);
+  };
+
   return (
     <div className="min-h-screen text-white relative selection:bg-purple-500 selection:text-white overflow-hidden">
       
@@ -47,19 +74,18 @@ function App() {
       {/* 2. The Main Content */}
       <div className="relative z-10 max-w-5xl mx-auto p-4 md:p-8">
         
-        {/* === NEW HEADER SECTION (With Modern Logo) === */}
+        {/* === HEADER SECTION === */}
         <header className="text-center mb-16 animate-fade-in pt-10">
           
-          {/* Optional: 'Powered By' Badge */}
+          {/* 'Powered By' Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-blue-300 mb-6 backdrop-blur-sm">
             <Sparkles size={14} />
             <span>Powered by Gemini 3 Flash</span>
           </div>
 
-          {/* The Logo Container */}
+          {/* Logo */}
           <div className="flex justify-center items-center gap-4 mb-4">
             <div className="relative">
-              {/* Glowing Blur Effect behind the icon */}
               <div className="absolute inset-0 bg-blue-500 blur-lg opacity-50 animate-pulse" />
               <Compass size={48} className="relative text-white fill-blue-500/20" />
               <Sparkles size={20} className="absolute -top-2 -right-2 text-yellow-400 animate-bounce" />
@@ -72,79 +98,124 @@ function App() {
           <p className="text-gray-400 text-lg md:text-xl font-light max-w-2xl mx-auto">
             Your AI Career Architect. Stop searching, start learning.
           </p>
-        </header>
-        {/* ============================================= */}
 
-        {/* Input Section - Glass Card */}
+          {/* Library Button */}
+          <div className="mt-6">
+            <button
+              onClick={handleOpenLibrary}
+              className="px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-600 rounded-xl text-sm font-medium text-gray-300 transition-all flex items-center gap-2 mx-auto"
+            >
+              <BookMarked className="w-4 h-4" />
+              Saved Roadmaps
+              {savedCount > 0 && (
+                <span className="px-2 py-0.5 bg-blue-600 text-white text-xs rounded-full">
+                  {savedCount}
+                </span>
+              )}
+            </button>
+          </div>
+        </header>
+
+        {/* === INPUT SECTION === */}
         <div className="max-w-2xl mx-auto bg-gray-900/40 backdrop-blur-xl p-8 rounded-3xl border border-white/10 shadow-2xl mb-12 animate-slide-up hover:border-white/20 transition-colors duration-500">
           <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-400 mb-2 ml-1">I want to become a...</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Map className="h-5 w-5 text-gray-500 group-focus-within:text-blue-400 transition-colors" />
-                </div>
-                <input 
-                  className="w-full pl-12 pr-4 py-4 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 focus:bg-gray-800 transition-all outline-none text-white placeholder-gray-600 font-medium"
-                  placeholder="e.g. Full Stack Developer, Data Scientist..." 
-                  value={goal}
-                  onChange={(e) => setGoal(e.target.value)}
-                />
-              </div>
-            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2 ml-1">Current Level</label>
-                <div className="relative">
-                  <select 
-                    className="w-full p-4 bg-gray-800/50 border border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none text-white appearance-none cursor-pointer hover:bg-gray-800 transition-colors"
-                    value={level}
-                    onChange={(e) => setLevel(e.target.value)}
-                  >
-                    <option>Beginner</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-500">
-                    <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-end">
-                <button 
-                  onClick={handleGenerate}
-                  disabled={loading}
-                  className="group relative w-full p-4 bg-gradient-to-r from-blue-600 to-violet-600 rounded-xl font-bold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+            {/* Goal Input */}
+            <div>
+              <label htmlFor="goal" className="block text-sm font-medium text-gray-400 mb-2">
+                I want to become a...
+              </label>
+              <input 
+                id="goal"
+                type="text"
+                className="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="e.g. Full Stack Developer, Data Scientist..." 
+                value={goal}
+                onChange={(e) => setGoal(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleGenerate()}
+              />
+            </div>
+
+            {/* Level Selector */}
+            <div className="grid grid-cols-3 gap-3">
+              {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
+                <button
+                  key={lvl}
+                  onClick={() => setLevel(lvl)}
+                  className={`px-4 py-3 rounded-xl font-medium transition-all ${
+                    level === lvl
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25'
+                      : 'bg-gray-800/50 border border-gray-600 text-gray-400 hover:border-gray-500'
+                  }`}
                 >
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
-                  <span className="relative flex items-center justify-center gap-2">
-                    {loading ? (
-                      <>
-                        <Loader2 className="animate-spin" size={20} />
-                        Crafting Plan...
-                      </>
-                    ) : (
-                      <>
-                        Generate Roadmap <ArrowRight size={20} />
-                      </>
-                    )}
-                  </span>
+                  {lvl}
                 </button>
+              ))}
+            </div>
+
+            {/* Generate Button */}
+            <button 
+              onClick={handleGenerate}
+              disabled={!goal.trim() || loading}
+              className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl font-bold text-white flex items-center justify-center gap-2 hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Generating your path...
+                </>
+              ) : (
+                <>
+                  <Map className="w-5 h-5" />
+                  Generate Roadmap
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
+            </button>
+
+            {/* Error Display */}
+            {error && (
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl flex items-start gap-3 text-red-400">
+                <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <p className="text-sm">{error}</p>
               </div>
-            </div>
+            )}
           </div>
-          {error && (
-            <div className="flex items-center gap-2 mt-6 text-red-400 bg-red-500/10 p-4 rounded-xl border border-red-500/20">
-              <AlertCircle size={20} />
-              <p>{error}</p>
-            </div>
-          )}
         </div>
 
-        {/* Results Section */}
-        {data && <Roadmap data={data} />}
+        {/* === ROADMAP DISPLAY === */}
+        {data && (
+          <div className="space-y-6">
+            {/* Save Button */}
+            <div className="flex justify-center">
+              <button
+                onClick={handleSaveRoadmap}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-all flex items-center gap-2 shadow-lg"
+              >
+                <Save className="w-5 h-5" />
+                Save This Roadmap
+              </button>
+            </div>
+
+            {/* Success Message */}
+            {showSaveSuccess && (
+              <div className="max-w-2xl mx-auto p-4 bg-green-500/10 border border-green-500/30 rounded-xl text-green-400 text-center animate-slide-up">
+                ✅ Roadmap saved successfully! View it in your library.
+              </div>
+            )}
+
+            <Roadmap data={data} />
+          </div>
+        )}
       </div>
+
+      {/* === LIBRARY MODAL === */}
+      {showLibrary && (
+        <SavedRoadmaps
+          onLoadRoadmap={handleLoadRoadmap}
+          onClose={() => setShowLibrary(false)}
+        />
+      )}
     </div>
   );
 }
