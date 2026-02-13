@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import profile
 import re
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
@@ -247,14 +248,13 @@ async def generate_roadmap(profile: UserProfile, request: Request):
 
     # The Prompt
     prompt = (
-        f"Create a learning roadmap for a {profile.level} wanting to become a {profile.goal}. "
-        f"Return ONLY a JSON array where each object has these fields: "
-        f"'step_number' (integer), 'title' (string), 'description' (string), "
-        f"'estimated_time' (string), and 'resources' (array of strings with links or names). "
-        f"Do not include markdown formatting like ```json. "
-        f"Provide 6-8 clear, actionable steps."
-    )
-    
+    f"Create a learning roadmap for a {profile.level} wanting to become a {profile.goal}. "
+    f"Return ONLY a JSON array where each object has these fields: "
+    f"'step_number' (integer), 'title' (string), 'description' (string - keep under 100 words), "
+    f"'estimated_time' (string), and 'resources' (array of 2-3 strings with links or names). "
+    f"Do not include markdown formatting like ```json. "
+    f"Provide 6-8 clear, actionable steps with concise descriptions."
+    )    
     try:
         logger.info(f"🤖 Generating roadmap: {profile.goal} ({profile.level}) from {client_ip}")
         

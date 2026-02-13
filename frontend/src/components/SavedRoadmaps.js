@@ -39,15 +39,17 @@ const SavedRoadmaps = ({ onLoadRoadmap, onClose }) => {
     if (file) {
       RoadmapStorage.importRoadmaps(file, (success, count) => {
         if (success) {
-          loadRoadmaps();
-          alert(`Successfully imported ${count} roadmap(s)!`);
-        } else {
-          alert('Failed to import roadmaps. Please check the file format.');
-        }
-      });
-    }
-  };
 
+          loadRoadmaps();
+          
+        }
+        // Remove everything else - no alerts needed here
+      });
+    
+    // Clear input so same file can be selected again
+    event.target.value = '';
+  }
+};  
   const handleLoadRoadmap = (roadmap) => {
     RoadmapStorage.updateLastViewed(roadmap.id);
     onLoadRoadmap(roadmap);

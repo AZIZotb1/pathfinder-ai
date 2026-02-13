@@ -152,33 +152,112 @@ class RoadmapStorage {
   }
 
   // Import roadmaps from backup file
-  static importRoadmaps(file, callback) {
-    try {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const imported = JSON.parse(e.target.result);
-          const current = this.getAllRoadmaps();
-          
-          // Merge imported with current (avoid duplicates by ID)
-          const existingIds = new Set(current.map(r => r.id));
-          const newRoadmaps = imported.filter(r => !existingIds.has(r.id));
-          
-          const merged = [...current, ...newRoadmaps];
-          localStorage.setItem(this.STORAGE_KEY, JSON.stringify(merged));
-          
-          callback(true, newRoadmaps.length);
-        } catch (error) {
-          console.error('Error parsing import file:', error);
-          callback(false, 0);
-        }
-      };
-      reader.readAsText(file);
-    } catch (error) {
-      console.error('Error importing roadmaps:', error);
-      callback(false, 0);
-    }
+// Import roadmaps from backup file
+static importRoadmaps(file, callback) {
+  // Check file type first
+  if (!file.name.endsWith('.json')) {
+    alert('❌ Only JSON files can be imported!\n\nText files (.txt) are for reading only.\nPlease use a JSON file from "Export All" or single roadmap export.');
+    callback(false, 0);
+    return;
   }
+
+  try {
+    const reader = new FileReader();
+    
+    reader.onerror = () => {
+      alert('❌ Failed to read file. Please try again.');
+      callback(false, 0);
+    };
+    
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        
+        // Handle both single roadmap and array of roadmaps
+        let roadmapsToImport = [];
+        
+        if (Array.isArray(imported)) {
+          // It's an "Export All" file
+          roadmapsToImport = imported;
+        } else if (imported.id && imported.goal && imported.steps) {
+          // It's a single roadmap export
+          roadmapsToImport = [imported];
+        } else {
+          alert('❌ Invalid backup file!\n\nThis doesn\'t look like a valid roadmap file.');
+          callback(false, 0);
+          return;
+        }
+        
+        // Validate structure
+        const isValid = roadmapsToImport.every(r => 
+          r.id && r.goal && r.level && r.steps && Array.isArray(r.steps)
+        );
+        
+        if (!isValid) {
+          alert('❌ Invalid file structure!\n\nSome roadmaps are missing required fields.');
+          callback(false, 0);
+          return;
+        }
+        
+        const current = this.getAllRoadmaps();
+        
+        // Merge imported with current (avoid duplicates by ID)
+        const existingIds = new Set(current.map(r => r.id));
+        const newRoadmaps = roadmapsToImport.filter(r => !existingIds.has(r.id));
+        
+        if (newRoadmaps.length === 0) {
+          alert('ℹ️ Already exists!\n\nThis roadmap is already in your library.');
+          callback(false, 0);
+          return;
+        }
+        
+        const merged = [...current, ...newRoadmaps];
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(merged));
+        
+        alert(`✅ Success!\n\nImported ${newRoadmaps.length} roadmap${newRoadmaps.length !== 1 ? 's' : ''}!`);
+        callback(true, newRoadmaps.length);
+      } catch (error) {
+        console.error('Error parsing import file:', error);
+        alert('❌ Failed to parse file!\n\nMake sure it\'s a valid JSON file.');
+        callback(false, 0);
+      }
+    };
+    
+    reader.readAsText(file);
+  } catch (error) {
+    console.error('Error importing roadmaps:', error);
+    alert('❌ An error occurred. Please try again.');
+    callback(false, 0);
+  }
+
+
+  try {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const imported = JSON.parse(e.target.result);
+        const current = this.getAllRoadmaps();
+        
+        // Merge imported with current (avoid duplicates by ID)
+        const existingIds = new Set(current.map(r => r.id));
+        const newRoadmaps = imported.filter(r => !existingIds.has(r.id));
+        
+        const merged = [...current, ...newRoadmaps];
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(merged));
+        
+        callback(true, newRoadmaps.length);
+      } catch (error) {
+        console.error('Error parsing import file:', error);
+        callback(false, 0);
+        alert('Invalid backup file. Please use a file from "Export All".');
+      }
+    };
+    reader.readAsText(file);
+  } catch (error) {
+    console.error('Error importing roadmaps:', error);
+    callback(false, 0);
+  }
+}
 
   // Clear all roadmaps
   static clearAll() {
