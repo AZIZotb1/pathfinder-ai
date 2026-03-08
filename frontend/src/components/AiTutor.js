@@ -52,7 +52,7 @@ const AiTutor = ({ goal, roadmapData }) => {
       console.error('Chat error:', error);
       setMessages(prev => [...prev, { 
         role: 'assistant', 
-        content: "Sorry, I'm having trouble connecting. Please make sure the backend is running!" 
+        content: "Sorry, something went wrong. Please try again in a moment."
       }]);
     } finally {
       setLoading(false);

@@ -36,7 +36,7 @@ function App() {
       setData(result); 
       
     } catch (err) {
-      setError("Failed to connect to AI. Is the backend running?");
+      setError("Something went wrong. Please try again in a moment.");
       console.error(err);
     } finally {
       setLoading(false);

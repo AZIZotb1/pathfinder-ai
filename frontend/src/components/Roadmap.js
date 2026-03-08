@@ -147,8 +147,8 @@ const Roadmap = ({ data, goal }) => {
                   </div>
                 ) : (
                   <div className="text-red-400 text-center p-4 bg-red-500/10 rounded-lg border border-red-500/20">
-                    <p className="font-bold">⚠️ Connection Error</p>
-                    <p className="text-xs mt-1 opacity-80">Backend failed to respond. Check main.py terminal.</p>
+                    <p className="font-bold">Could not load details</p>
+                    <p className="text-xs mt-1 opacity-80">Please try again in a moment.</p>
                   </div>
                 )}
               </div>
