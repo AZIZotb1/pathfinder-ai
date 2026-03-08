@@ -199,6 +199,7 @@ async def health_check():
 
 @app.post("/generate-roadmap")
 async def generate_roadmap(profile: UserProfile, _: str = Depends(require_rate_limit)):
+    logger.info(f"Roadmap requested: '{profile.goal}' - {profile.level}")
     cache_key = f"{profile.goal.lower()}-{profile.level.lower()}"
     if cache_key in backend_cache:
         return backend_cache[cache_key]
