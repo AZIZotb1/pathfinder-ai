@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const InteractiveBackground = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const spotlightRef = useRef(null);
 
   useEffect(() => {
     const handleMouseMove = (event) => {
-      setMousePosition({
-        x: event.clientX,
-        y: event.clientY,
-      });
+      if (spotlightRef.current) {
+        spotlightRef.current.style.background = `radial-gradient(600px circle at ${event.clientX}px ${event.clientY}px, rgba(99, 102, 241, 0.15), transparent 80%)`;
+      }
     };
 
     window.addEventListener('mousemove', handleMouseMove);
@@ -26,15 +25,16 @@ const InteractiveBackground = () => {
       <div className="absolute bottom-[-10%] left-[20%] w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] animate-blob animation-delay-4000" />
 
       {/* 3. The Mouse Spotlight (Follows You) */}
-      <div 
+      <div
+        ref={spotlightRef}
         className="absolute inset-0 transition-opacity duration-300"
-        style={{
-          background: `radial-gradient(600px circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(99, 102, 241, 0.15), transparent 80%)`
-        }}
       />
 
       {/* 4. The Grid Overlay (Cyberpunk feel) */}
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+      <div
+        className="absolute inset-0 opacity-20 brightness-100 contrast-150 mix-blend-overlay"
+        style={{ backgroundImage: `url(${process.env.PUBLIC_URL}/assets/noise.svg)` }}
+      />
     </div>
   );
 };

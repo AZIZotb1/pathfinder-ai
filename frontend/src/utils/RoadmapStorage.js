@@ -213,7 +213,7 @@ static importRoadmaps(file, callback) {
         
         const merged = [...current, ...newRoadmaps];
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(merged));
-        
+
         alert(`✅ Success!\n\nImported ${newRoadmaps.length} roadmap${newRoadmaps.length !== 1 ? 's' : ''}!`);
         callback(true, newRoadmaps.length);
       } catch (error) {
@@ -222,39 +222,11 @@ static importRoadmaps(file, callback) {
         callback(false, 0);
       }
     };
-    
+
     reader.readAsText(file);
   } catch (error) {
     console.error('Error importing roadmaps:', error);
     alert('❌ An error occurred. Please try again.');
-    callback(false, 0);
-  }
-
-
-  try {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const imported = JSON.parse(e.target.result);
-        const current = this.getAllRoadmaps();
-        
-        // Merge imported with current (avoid duplicates by ID)
-        const existingIds = new Set(current.map(r => r.id));
-        const newRoadmaps = imported.filter(r => !existingIds.has(r.id));
-        
-        const merged = [...current, ...newRoadmaps];
-        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(merged));
-        
-        callback(true, newRoadmaps.length);
-      } catch (error) {
-        console.error('Error parsing import file:', error);
-        callback(false, 0);
-        alert('Invalid backup file. Please use a file from "Export All".');
-      }
-    };
-    reader.readAsText(file);
-  } catch (error) {
-    console.error('Error importing roadmaps:', error);
     callback(false, 0);
   }
 }

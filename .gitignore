@@ -17,6 +17,8 @@ frontend/build/
 
 # Environment variables and secrets
 .env
+*.env
+!*.env.example
 *.pem
 *.key
 
@@ -32,3 +34,4 @@ tmp/
 .idea/
 .DS_Store
 Thumbs.db
+tempCodeRunnerFile.py
